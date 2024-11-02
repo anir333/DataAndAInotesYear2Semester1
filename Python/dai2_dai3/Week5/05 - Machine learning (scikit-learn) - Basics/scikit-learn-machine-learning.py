@@ -107,7 +107,8 @@ plt.show()
 
 # Supervised Learning example:
 # Let's divide the data in training and test data:
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, LeaveOneGroupOut
+
 Xtrain, Xtest, ytrain, ytest = train_test_split(X_iris, y_iris, random_state=1) # give it the dataframe data to train and the target data, so it knows that we are training it to predict the target array daya given the training data provided, by default it does 75% data for training and 25% for testing
 print(X_iris, y_iris)
 
@@ -167,6 +168,13 @@ from sklearn.model_selection import train_test_split
 # split the data with 50% in each set
 X1, X2, y1, y2 = train_test_split(X, y, random_state=0,
                                   train_size=0.5)
+# here X1 is half of the data used for training and X2 is the other half used for testing
+# y1 contains target labels for X1, y2 contains target labels for X2
+print("\n\nX1\n: ", X1)
+print("\n\ny1\n: ", y1)
+print("\n\nX2\n: ", X2)
+print("\n\ny2\n: ", y2)
+
 
 # fit the model on one set of data
 model.fit(X1, y1)
@@ -178,20 +186,67 @@ print("\n\nCorrect way accuracy score: ", accuracy_score(y2, y2_model)) # It sho
 
 
 
+# Problem: If we divide the data in training dataset and testing dataset, we are losing some data that we could've used to train our model.
+# Solution: Cross-Validation: a sequence of fits where each subset of the data is used both as a training and as a validation set.
+y2_model = model.fit(X1, y1).predict(X2) # we use first X1 as data, and y1 as training data to redict X2
+y1_model = model.fit(X2, y2).predict(X1) # now we use X2 as training data and y2 as test data to predict X1
+
+print("Accuracy model y2 prediction: ", accuracy_score(y2, y2_model)) # pass in the targets and the model trained
+print("Accuracy model y1 prediction: ", accuracy_score(y1, y1_model))
+
+#  Since each model is trained/tested on half of the data, we can combine them by taking the mean of their accuracy in order to get a better measure of their performance. This way of cross-validation is known as two-fold cross-validation since we spilt the data in two sets and use each in turn as a validation set.
+
+# In order to make even more splits on our data and make use each of them to evaluate the model fit, we can do it faster and more easily this way:
+from sklearn.model_selection import cross_val_score
+print(cross_val_score(model, X, y, cv=5)) # we're telling it to make 5 splits, train them, test them, and give us the accuracy | (X is the data and y is the target)
+# So it will return an array of 5 different accuracies
+
+
+""" LOO (Leave-one-out cross-validation):
+        - Create a fold for each data point in the dataset.
+        - For each fold, train the model on ALL data points except one, and then test the model on that single data point left out. Repeat this process for every single data point.
+"""
+from sklearn.model_selection import LeaveOneOut
+scores = cross_val_score(model, X, y, cv=LeaveOneOut())
+print(scores) # an array of 1's or 0's for every single data point in the data provided (1 is True: model predicted correctly, 0 is False: model predicted incorrectly)
+
+# Since in this case we have 150 data points, we wil have 150 samples of accuracy, by getting the mean we can get the total model accuracy:
+print(scores.mean())
 
 
 
 
+"""
+The Bias-Variance Trade-off explains the balance needed to build a good model that generalizes well:
 
+    1. Underfitting - (High Bias): A model that’s too simple (like a straight line for complex data) won’t capture the patterns in the data, leading to high bias (the model underfits the data). It ignores important data features, resulting in a poor fit.
 
+    2. Overfitting - (High Variance): A model that’s too complex (like a high-degree curve for simpler data) fits the training data too closely, capturing noise instead of meaningful patterns. This results in high variance (the model overfits the data), where the model performs well on training data but poorly on new data.
 
-
-
-
-
-
-
-
-
-
+        - The goal is to find a balance—enough flexibility to capture patterns without fitting noise—achieving a model with low bias and low variance.
+    
+    - For high-bias models, the performance of the model on the testing/validation set is similar to the performance on the training set.
+    - For high-variance models, the performance of the model on the testing/validation set is far worse than the performance on the training set.
+    
+    - The training score is everywhere higher than the validation score. This is generally the case: the model will be a better fit to data it has seen than to data it has not seen.
+    
+    - For very low model complexity (a high-bias model), the training data is underfit:
+            - The model is a poor predictor both for the training data and for any previously unseen data.
+    - For very high model complexity (a high-variance model), the training data is overfit: 
+            - The model predicts the training data very well, but fails for any previously unseen data.
+            
+    - For some intermediate value, the validation curve has a maximum. This level of complexity indicates a suitable trade-off between bias and variance.
+    
+    # The training score measures the model's accuracy on the training data.
+    # The validation score measures the model's accuracy on unseen data.
+    
+        - Examining the relationship between the training score and the validation score can give us useful insight into the performance of the model.
+    
+    # With more data, a more complex model can fit well without overfitting, as shown by closer training and validation scores. A learning curve shows how training and validation scores change as the dataset grows:
+        - Small datasets lead to overfitting (high training, low validation scores).
+        - Large datasets lead to underfitting (training score decreases, validation score increases).
+        
+    # When the learning curve has already converged (when training and validation curves are already close to each other), adding more data won't significantly improve the fit.
+    # To improve the final score, we can use a more complex model, though it may increase variance between training and validation scores.
+"""
 
