@@ -792,6 +792,6 @@ sns.boxplot(x='Category', y='Values', data=df, hue='Category', legend=False, pal
 
 plt.title("Boxplot with Seaborn")
 plt.xlabel("x_axis")
-plt.ylabel("y_axis") 
+plt.ylabel("y_axis")
 
 plt.show()
