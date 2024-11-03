@@ -31,6 +31,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
+# to know all seaborn available datasets:
+sampledatasets = sns.get_dataset_names()
+print(sampledatasets)
+
 iris = sns.load_dataset('iris')
 sns.pairplot(iris, hue='species', height=1.5)
 plt.show()
