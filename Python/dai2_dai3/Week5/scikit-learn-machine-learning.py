@@ -264,6 +264,23 @@ The Bias-Variance Trade-off explains the balance needed to build a good model th
     # To improve the final score, we can use a more complex model, though it may increase variance between training and validation scores.
     
     The validation curve summarizes the tradeoff between training and validation errors as we vary the model complexity. The learning curve summarizes the tradeoff between training and validation errors as we vary the size of the training set.
+    
+    DecisionTreeClassifier vs DecisionTreeRegressor:
+        - DTR predicts continuous values (regression), while DTC predicts categorical labels (classification).
+        - DTR uses mean squared error (MSE) or mean absolute error (MAE) as the split criterion, whereas DTC uses Gini impurity or information gain.
+        - DTR produces a continuous value as the predicted output, while DTC outputs a class label.
+        - DTR can handle missing values by imputing them with the mean or median of the respective feature. DTC can also handle missing values, but it will propagate them to the leaf nodes.
+        - DTR typically requires tuning parameters like max_depth, min_samples_split, and min_samples_leaf. DTC also has these hyperparameters, plus criterion (Gini or entropy) and class_weight (balanced or not).
+    
+    When to use each:
+        1. Decision Tree Regression (DTR):
+            - When the target variable is continuous (e.g., predicting a numerical value).
+            - When the problem involves predicting a range or interval (e.g., predicting a continuous value between 0 and 100).
+            - When you need to model non-linear relationships between features and the target variable.
+        2. Decision Tree Classifier (DTC):
+            - When the target variable is categorical (e.g., classifying into two or more classes).
+            - When the problem involves predicting a discrete label (e.g., spam/not spam, 0/1).
+            - When you need to model complex relationships between features and class labels.
 """
 
 import matplotlib.pyplot as plt
