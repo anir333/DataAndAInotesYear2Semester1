@@ -761,6 +761,8 @@ plt.show()
 
 sns.scatterplot(data=tips, x="total_bill", y="tip", hue="time")
 plt.show()
+while(1):
+    continue
 
 sns.scatterplot(data=tips, x="total_bill", y="tip", hue="time", style='time')
 plt.show()

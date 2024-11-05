@@ -39,6 +39,7 @@ iris = sns.load_dataset('iris')
 sns.pairplot(iris, hue='species', height=1.5)
 plt.show()
 
+
 # Extract feature matrix (matrix with independent/predictor variables)
 # (by deleting the target variable)
 X_iris = iris.drop('species', axis=1)
@@ -91,9 +92,9 @@ print(X.shape)
 # 4. Fit model to the data (apply the model to our data):
 model.fit(X, y) # we use the two-dimensional version of x, (X), otherwise we'll get error at runtime
 
-# the fit command makes a lot of computations to take place and stores them in attributes
-print(model.coef_)
-print(model.intercept_)
+# the .fit() fit command makes a lot of computations to take place and stores them in attributes
+print(model.coef_) # this prints the slope
+print(model.intercept_) # this prints the intercept
 
 # Predict labels for unknown data
 # new data that wasn't used for training the model
@@ -140,8 +141,13 @@ iris['cluster'] = y_gmm
 # Hyperparameters and Model Validation
 
 """
+Clusters: The goal of clustering is to maximize the similarity of observations within a cluster and maximize the the dissimilarity between clusters. 
+    - Clustering: Unsupervised Learning
+            
+    - Classification: 
+
 K-Nearest Neighbors (KNN) => Classification method used in supervised learning;
-    - It uses data already classified with known labels, and in order to classify new data into a label, it looks at k closest points in the labeled data. So it uses the given labeled data and looks at what's closes to the data we're trying to predict a label for, and assigns the closes label io it.
+    - It uses data already classified with known labels, and in order to classify new data into a label, it looks at k closest points in the labeled data. So it uses the given labeled data and looks at what's closes to the data we're trying to predict a label for, and assigns the closest label to it.
 
 K-Means is used for unsupervised learning:
     - The data has no labels, thus it groups points into clusters based on similarity of the data without predicting any labels.
@@ -224,8 +230,12 @@ print(scores.mean())
 The Bias-Variance Trade-off explains the balance needed to build a good model that generalizes well:
 
     1. Underfitting - (High Bias): A model that’s too simple (like a straight line for complex data) won’t capture the patterns in the data, leading to high bias (the model underfits the data). It ignores important data features, resulting in a poor fit.
+        - The model does not capture the underlying patterns in the data.
+        The model has low accuracy on both training and test sets.
 
     2. Overfitting - (High Variance): A model that’s too complex (like a high-degree curve for simpler data) fits the training data too closely, capturing noise instead of meaningful patterns. This results in high variance (the model overfits the data), where the model performs well on training data but poorly on new data.
+        - The model has memorized the training data but performs poorly on new data.
+        - The model fits the random noise in the training data.
 
         - The goal is to find a balance—enough flexibility to capture patterns without fitting noise—achieving a model with low bias and low variance.
     
@@ -252,5 +262,280 @@ The Bias-Variance Trade-off explains the balance needed to build a good model th
         
     # When the learning curve has already converged (when training and validation curves are already close to each other), adding more data won't significantly improve the fit.
     # To improve the final score, we can use a more complex model, though it may increase variance between training and validation scores.
+    
+    The validation curve summarizes the tradeoff between training and validation errors as we vary the model complexity. The learning curve summarizes the tradeoff between training and validation errors as we vary the size of the training set.
 """
 
+import matplotlib.pyplot as plt
+import pandas as pd
+import numpy as np
+import seaborn as sns; sns.set()
+
+### 5.6 - Linear Regression
+# Simple example:
+rng = np.random.RandomState(1)
+x = 10 * rng.rand(50) # array of 50 random numbers from 0 to 10
+y = 2 * x - 5 + rng.randn(50) # array of 50 random numbers with an intercept of -5 and a slope of 2
+# plt.scatter(x, y)
+
+from sklearn.linear_model import LinearRegression
+model = LinearRegression(fit_intercept=True)
+model.fit(x[:, np.newaxis], y) # use a two-dimensional version of x to fit the model
+
+xfit = np.linspace(0, 10, 1000)
+yfit = model.predict(xfit[:, np.newaxis])
+
+plt.scatter(x, y)
+plt.plot(xfit , yfit)
+plt.show()
+
+# Close values
+print("Model slope:     ", model.coef_)
+print("Model intercept: ", model.intercept_)
+
+
+# Making a three-dimensional polynomial basis function:
+from sklearn.preprocessing import PolynomialFeatures
+x = np.array([2, 3, 4])
+poly = PolynomialFeatures(3, include_bias=False)
+print(poly.fit_transform(x[:, None]))
+
+# Complex sine model:
+from sklearn.pipeline import make_pipeline
+poly_model = make_pipeline(PolynomialFeatures(7),
+                           LinearRegression())
+rng = np.random.RandomState(1)
+x = 10 * rng.rand(50)
+y = np.sin(x) + 0.1 * rng.randn(50)
+
+poly_model.fit(x[:, np.newaxis], y)
+yfit = poly_model.predict(xfit[:, np.newaxis])
+
+plt.scatter(x, y)
+plt.plot(xfit, yfit)
+plt.show()
+
+
+"""
+### Basis function regression: 
+    - It adapts linear regression to handle complex (nonlinear) relationships between the input x and output y.
+    => This means that with basis functions, we transform the input with exponents, in order to square or cube, etc the input, so that the regression line doesn't always have to follow a simple straight path, and can adapt to the different curved features of the data.
+        e.g. Imagine you throw a ball and you want to follow its path with a line, if you use a simple linear regression line, the line can only move in one direction, thus it won't show in detail changes of the patterns in the data. But by being able to add exponents to the data via basis functions, we can adapt the curvature of the line in order to show a better example of the path that the ball made.
+
+### Regularisation
+    - Helps avoid overfitting on basis function regression by penalizing large coefficient values.
+        1. Ridge Regression (L2 Regularization):
+            ==> Penalizes the sum of the squares of coefficients. Helps keep all coefficients small, making the model more stable and generalizable.
+        2. Lasso Regression (L1 Regularization):
+            ==> Penalizes the sum of the absolute values of coefficients, often pushing some coefficients to zero. This makes the model simpler by keeping only the most important features. 
+"""
+
+# Decision Trees:
+# data
+from sklearn.datasets import make_blobs
+X, y = make_blobs(n_samples=300, centers=4,
+                  random_state=0, cluster_std=1.0)
+
+from sklearn.tree import DecisionTreeClassifier
+tree = DecisionTreeClassifier().fit(X, y)
+# the python method visualize_classifier is written in notebook 5.8 -> visualize_classifier(DecisionTreeClassifier(), X, y)
+
+
+# Multiple overfitting estimators combined can reduce the effect of this overfitting (random forests in terms of classification -> categorical variables)
+# Bagging makes use of an ensemble of overfitting estimators which overfit the data and averages the results to find the better classification. An ensemble of randomized decision trees is known as a random forest.
+# We can to a type of bagging classification (what was just explained) this way:
+
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import BaggingClassifier
+
+tree = DecisionTreeClassifier()
+bag = BaggingClassifier(tree, n_estimators=100, max_samples=0.8,
+                        random_state=1)
+
+bag.fit(X, y)
+# visualize_classifier(bag, X, y) -> method to visualize in 5.8
+
+# ensemble of randomized decision trees:
+from sklearn.ensemble import RandomForestClassifier
+model = RandomForestClassifier(n_estimators=100, random_state=0)
+# visualize_classifier(model, X, y); -> def in 5.8
+
+
+# Random Forest in terms of Regression -> continuous variables
+from sklearn.ensemble import RandomForestRegressor
+forest = RandomForestRegressor(200)
+# forest.fit(x[:, None], y)
+
+# xfit = np.linspace(0, 10, 1000)
+# yfit = forest.predict(xfit[:, None])
+# ytrue = model(xfit, sigma=0) -> def defined in 5.8
+
+# plt.errorbar(x, y, 0.3, fmt='o', alpha=0.5)
+# plt.plot(xfit, yfit, '-r');
+# plt.plot(xfit, ytrue, '-k', alpha=0.5)
+# plt.show()
+
+
+"""
+1. Decision Trees:
+    - To make decisions based on features of data. It conditionally creates branches that flow towards different directions depending on the answer.
+    It splits the data by asking a binary (yes/no) question on each node (feature-based).
+    - Limitations: Overfitting => Decision trees can overfit easily (they memorize data's noise instead of general patterns which makes them less accurate on new data.
+    
+2. Random Forests: A collection of decision trees
+    - A Random Forest is an ENSEMBLE method that combines the predictions of multiple decision trees.
+    - It uses multiple trees to reduce overfitting. By making an average of multiple trees, the random forest reduces overfitting risk because the errors of the individual decision trees tend to cancel each other out. Trees are also sensitive to training data, while a small change in a tree can lead to a very different tree, within a random forest which contains multiple trees, a small change doesn't make such an important impact.
+    
+    How It Works:
+
+Bootstrap Sampling: Each tree is trained on a random subset of the training data (known as bootstrapping). This helps each tree capture different patterns.
+Feature Selection for Splits: When each tree is growing, it selects a random subset of features at each split. This way, each tree sees slightly different information and makes slightly different splits.
+Prediction: For classification, each tree gives its prediction (e.g., category “high income” or “low income”), and the forest takes a majority vote. For regression, it averages the predictions.
+Example:
+
+Suppose you want to classify whether a person will buy a product.
+A random forest will build multiple trees. Each tree might make a different decision based on its training subset.
+By aggregating the output (e.g., majority vote), you get a more reliable prediction than relying on a single tree.
+Technical Aspects in Practice:
+
+Hyperparameters: Important parameters include the number of trees (n_estimators), the max depth of each tree (max_depth), and the number of features considered at each split (max_features).
+Scikit-Learn: In Python’s Scikit-Learn, RandomForestClassifier is used for classification tasks, and RandomForestRegressor is used for regression.
+Advantages:
+
+Accuracy: Random Forests are often very accurate because they combine many models.
+Resistant to Overfitting: By combining multiple trees, random forests reduce the likelihood of overfitting, even with large trees.
+Disadvantages:
+
+Interpretability: While a single decision tree is easy to interpret, a random forest with hundreds of trees is more of a “black box.”
+Computational Cost: Training multiple trees takes more time and memory, especially for large datasets.
+
+Summary
+Random Forests are powerful ensemble models that combine multiple decision trees to make more accurate and robust predictions. By averaging or voting on predictions from many trees trained on different parts of the data, random forests strike a balance between flexibility (reducing overfitting) and complexity, making them highly effective in a wide range of classification and regression tasks.
+"""
+
+
+
+
+
+""" 5.1 K-Means
+### K-Means Clustering:
+# Another type of unsupervised machine learning models: Clustering algorithms
+The k-means algorithm searches for a pre-determined number of clusters within an unlabeled multidimensional dataset.
+    - So basically it calculates the distance between each point and the center of the cluster it belongs to, and makes sure that the distance form the center of its cluster to it is smaller than the distance from the point to other cluster centers.
+    
+"""
+
+# visual example of a k-means algorthim plot:
+from sklearn.datasets import make_blobs
+X, y_true = make_blobs(n_samples=300, centers=4,
+                       cluster_std=0.60, random_state=0)
+plt.scatter(X[:, 0], X[:, 1], s=50)
+plt.show()
+
+# The K-Means algorithm makes the clusters automatically (scikit-learn using estimator API):
+from sklearn.cluster import KMeans
+kmeans = KMeans(n_clusters=4)
+kmeans.fit(X)
+y_kmeans = kmeans.predict(X)
+# and now visualise results of cluster with its centers:
+plt.scatter(X[:, 0], X[:, 1], c=y_kmeans, s=50, cmap='viridis')
+centers = kmeans.cluster_centers_
+plt.scatter(centers[:, 0], centers[:, 1], c='black', s=200, alpha=0.5);
+plt.show()
+
+
+
+""" 5.11 K-Means
+    - How the K-means algorithm finds these clusters: Expectation-Maximization (E-M):
+        - The E-M algorithm consists of:
+            1. Guess some cluster centers
+            2. Repeat until converged
+                2.1. E_Step: Assign points to the nearest cluster center
+                2.2. M_Step: set the cluster centers to the mean
+                
+        Expectation–maximization (E–M) is a powerful algorithm that comes up in a variety of contexts within data science.
+*k*-means is a particularly simple and easy-to-understand application of the algorithm, and we will walk through it briefly here.
+In short, the expectation–maximization approach here consists of the following procedure:
+
+1. Guess some cluster centers
+2. Repeat until converged
+   1. *E-Step*: assign points to the nearest cluster center
+   2. *M-Step*: set the cluster centers to the mean 
+
+Here the "E-step" or "Expectation step" is so-named because it involves updating our expectation of which cluster each point belongs to.
+The "M-step" or "Maximization step" is so-named because it involves maximizing some fitness function that defines the location of the cluster centers—in this case, that maximization is accomplished by taking a simple mean of the data in each cluster.
+
+The literature about this algorithm is vast, but can be summarized as follows: under typical circumstances, each repetition of the E-step and M-step will always result in a better estimate of the cluster characteristics.
+
+We can visualize the algorithm as shown in the following figure.
+For the particular initialization shown here, the clusters converge in just three iterations.
+"""
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# DATA PREPARATION
+import pandas as pd
+pd.options.display.max_rows = None
+import seaborn as sns
+iris = sns.load_dataset('iris')
+X = iris[['sepal_width', 'sepal_length', 'petal_width']] # Predictors
+y = iris['petal_length'] # Target feature to predict
+# MODEL SELECTION AND HYPERPARAMETER SELECTION (MODEL SPECIFIC)
+from sklearn.linear_model import LinearRegression
+model = LinearRegression(fit_intercept=True)
+print(model)
+# List all selected hyperparameters
+print(model.get_params(deep=True))
+# DERIVE MODEL FROM LABELED DATA (TRAIN MODEL/FIT MODEL)
+model.fit(X,y)
+# DISPLAY MODEL (MODEL SPECIFIC)
+print(model.intercept_, model.coef_)
+# VALIDATE MODEL USING LABELED DATA
+from sklearn.metrics import mean_absolute_error, mean_absolute_percentage_error, root_mean_squared_error
+# Predict target feature for the labeled data
+y_pred = pd.Series(model.predict(X), name='y_pred')
+# Calculate the difference between predicted and real values for the labeled data
+err = pd.Series(y_pred-y, name='err')
+print(pd.concat([y, y_pred, err], axis=1))
+# Metrics
+mae = mean_absolute_error(y_true=y, y_pred=y_pred)
+mape = mean_absolute_percentage_error(y_true=y, y_pred=y_pred)
+rmse = root_mean_squared_error(y_true=y, y_pred=y_pred)
+print(f'MAE : {mae:.3f} - MAPE : {mape:.3f} – RMSE : {rmse:.3f}')
