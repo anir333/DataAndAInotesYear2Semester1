@@ -145,29 +145,50 @@ This full training and evaluation cycle helps the model adjust to recognize patt
         -> Remove rows with null values
     4. Normalize data (if the value are continuous and not categorical)
         -> MinMaxScaler to fit and transform the data
+            -> IF Y IS CONTINUOUS AND NEED TO BE NORMALIZED ONLY USE TRANSFORM() SINCE FIT IS ONLY USED FOR DATA X and if IT GIVES ERRORS THEN JUST DONT
         -> By default most of the time the data will be continuous data so it will mostly always be necessary to normalize
-        -> Only normalize the target data if its continuous data and not categorical
+        -> Only normalize the target data if its continuous data and not categorical (JUST DON'T)
+        4.1 -> If Classification ONLY => one hot encoding
     5. Split the data
         -> Split data in training and test data
     6. Convert output in the right format
         -> To categorical with one hot encoding
     7. Define the model
-        -> 
+        -> Inputs (how much data)
+        -> Hidden Layers
+            -> activation function: relu
+        -> Outputs (how many needed): 
+            - To know if it's classification or regression you have to look at the target data, if it contains an array of continuous data then it's regression, if it contains categorical data then it's classification. to check ==> np.unique(target_y)
+            -> Number of outputs:
+                -> For Regression: 1
+                -> For Classification (number of categories) -> np.unique(target_y)
+            -> Activation function: 
+                -> For classification: softmax
+                -> For regression: linear
+        -> Make model with inputs and outputs & give it a name
+    8. Compile model:
+        -> Adam with learning rate of 0.001
+        -> Loss:
+            -> For classification: categorical_crossentropy
+            -> For regression: mean_squared_error
+        -> Metrics:
+            -> For classification: accuracy
+            -> For regression: mean_absolute_percentage_error
+    9. Train the model:
+        -> Fit it:
+            -> normalized x data for training
+            -> one hot encoded y train target
+            -> epochs depends on how large data is (large=5, small=100)
+            -> batch_size=32,
+            -> validation_split=0.1
+    10. Evaluate the model
+        -> Prints array of two values:
+            1. First value is the Loss
+            2. Second value is the Accuracy
+    11. Predict:
+        -> Using x test data
+        -> Compare with actual y_test target
 """
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 # Notebook 6.1:
