@@ -556,3 +556,73 @@ mae = mean_absolute_error(y_true=y, y_pred=y_pred)
 mape = mean_absolute_percentage_error(y_true=y, y_pred=y_pred)
 rmse = root_mean_squared_error(y_true=y, y_pred=y_pred)
 print(f'MAE : {mae:.3f} - MAPE : {mape:.3f} – RMSE : {rmse:.3f}')
+
+
+
+
+
+
+
+
+
+
+
+"""
+Hot to choose best model:
+
+To detect overfitting and underfitting, we can experiment with various models and techniques, assessing their performance on both training and test data. Here’s how to approach this:
+
+### 1. **Evaluate with Cross-Validation**
+   - **Cross-validation** (e.g., k-fold cross-validation) is a strong tool for assessing a model’s generalization. By splitting the data into multiple subsets, we can train and validate the model multiple times to get an average performance score, reducing the risk of overfitting or underfitting due to a single train-test split.
+
+### 2. **Try Other Models for Comparison**
+   In addition to linear regression, we can try different models, including those that may handle complex relationships or reduce overfitting:
+
+   - **Polynomial Regression**: Extends linear regression to handle non-linear relationships. However, it’s prone to overfitting if the polynomial degree is too high.
+   - **Ridge and Lasso Regression**: Both are forms of regularized regression that add penalties to reduce overfitting:
+     - **Ridge** (L2 regularization) reduces overfitting by adding a penalty for large coefficients.
+     - **Lasso** (L1 regularization) reduces overfitting and can also perform feature selection by driving some coefficients to zero.
+   - **Elastic Net**: Combines L1 and L2 penalties for more balanced regularization, often useful if Lasso or Ridge alone isn’t performing optimally.
+
+   You could also consider tree-based models, which often handle non-linear relationships better than simple linear models:
+   - **Decision Trees**: Basic tree models can help identify non-linear patterns but are prone to overfitting, especially if not pruned.
+   - **Random Forest**: An ensemble method that averages multiple decision trees to reduce overfitting.
+   - **Gradient Boosting**: Another ensemble technique that sequentially builds trees, which can be powerful but also prone to overfitting if not tuned carefully.
+
+### 3. **Compare Train and Test Performance**
+   Check if your model performs well on training data but poorly on test data. Key indicators:
+   - **Underfitting**: If both training and test errors are high, the model might be too simple for the data.
+   - **Overfitting**: If training error is low but test error is high, the model might be too complex and is overfitting the training data.
+
+### 4. **Use Validation Curves**
+   Validation curves are plots that show the relationship between a model parameter (like polynomial degree, or regularization strength in Ridge/Lasso) and the model's performance on the train and test sets. This helps find the optimal complexity.
+
+### 5. **Regularization for Overfitting Control**
+   Regularization is a key technique to control overfitting. Here’s how to use it with Ridge and Lasso:
+
+   ```python
+   from sklearn.linear_model import Ridge, Lasso
+   from sklearn.model_selection import cross_val_score
+
+   # Ridge Regression
+   ridge_model = Ridge(alpha=1.0)  # adjust alpha to control regularization strength
+   ridge_cv_score = cross_val_score(ridge_model, X, y, cv=5)
+   print("Ridge CV Score:", ridge_cv_score.mean())
+
+   # Lasso Regression
+   lasso_model = Lasso(alpha=0.1)  # adjust alpha similarly
+   lasso_cv_score = cross_val_score(lasso_model, X, y, cv=5)
+   print("Lasso CV Score:", lasso_cv_score.mean())
+   ```
+
+### 6. **Learning Curves**
+   A learning curve shows model performance on training and validation sets as the training size increases. If the training score is high and the test score is low, the model is overfitting. If both are low, the model is underfitting.
+
+### Summary Steps
+
+1. Start with cross-validation on multiple models.
+2. Use regularized regression (Ridge, Lasso, Elastic Net).
+3. Compare train-test errors.
+4. Look at learning and validation curves to assess fitting issues.
+5. Choose the model with the best balance of train-test performance.
+"""
